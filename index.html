@@ -74,6 +74,20 @@ h1 span{color:var(--accent);}
 .sect .tools{display:flex; gap:12px;}
 .sect .tools button{border:none; background:none; color:var(--sub); font-size:12px; cursor:pointer; font-family:inherit; text-decoration:underline; padding:0;}
 .sect .tools button.danger{color:var(--danger);}
+.seg{display:inline-flex; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:2px; gap:2px;}
+.seg button{border:none; background:none; color:var(--sub); font-size:12.5px; font-weight:700; font-family:inherit; padding:6px 12px; border-radius:8px; cursor:pointer;}
+.seg button.on{background:var(--accent); color:#fff;}
+#listHint{display:none; font-size:12px; color:var(--warn); background:var(--warn-soft); border:1px solid var(--warn); border-radius:9px; padding:8px 12px; margin-bottom:10px;}
+.item.pickrow{cursor:pointer;}
+.item.pickrow .chk{width:24px; height:24px; flex:none; border:1.5px solid var(--line); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--warn); font-weight:800;}
+.item.pickrow.picked{background:var(--warn-soft);}
+.item.pickrow.picked .chk{border-color:var(--warn); background:var(--warn); color:#fff;}
+#searchWrap{display:none; position:relative; margin-bottom:10px;}
+#searchBox{width:100%; border:1px solid var(--line); background:var(--card); color:var(--ink);
+  border-radius:11px; padding:11px 38px 11px 13px; font-size:14.5px; font-family:inherit;}
+#searchBox:focus{outline:none; border-color:var(--warn);}
+#searchClear{display:none; position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  border:none; background:none; color:var(--sub); font-size:14px; cursor:pointer; padding:6px; font-family:inherit;}
 .add-btn{width:100%; border:1.5px dashed var(--line); background:transparent; color:var(--sub);
   border-radius:12px; padding:11px; font-size:13.5px; font-weight:600; font-family:inherit; cursor:pointer; margin-bottom:10px;}
 .form{background:var(--card); border:1px solid var(--accent); border-radius:14px; padding:14px; margin-bottom:12px; display:none;}
@@ -200,11 +214,19 @@ details.syncwrap summary::after{content:" ›";}
 </div>
 
 <div class="sect">
-  <span id="listTitle">목록</span>
+  <span class="seg">
+    <button id="modeManage" class="on" onclick="setMode('manage')">목록</button>
+    <button id="modePick" onclick="setMode('pick')">⭐ 후보 담기</button>
+  </span>
   <span class="tools">
     <button id="expandBtn">모두 펼치기</button>
     <button id="resetBtn">방문기록 초기화</button>
   </span>
+</div>
+<div id="listHint">식당을 탭해 후보로 담고, 위쪽 '🎯 이 후보들 중에서 뽑기'로 담은 곳끼리만 돌리세요.</div>
+<div id="searchWrap">
+  <input id="searchBox" type="search" placeholder="🔍 상호·메뉴 검색 (예: 순대, 냉면, 카레)" autocomplete="off">
+  <button id="searchClear" title="지우기">✕</button>
 </div>
 
 <button class="add-btn" id="addBtn">＋ 밥집 추가</button>
@@ -251,7 +273,7 @@ details.syncwrap summary::after{content:" ›";}
 
 <p class="hint">
 · 상호를 탭하면 네이버지도가 열립니다. ✎ 수정 / ✕ 삭제(한 번 더 누르면 확정).<br>
-· ☆ 별을 눌러 후보로 담고, '이 후보들 중에서 뽑기'를 누르면 담은 곳끼리만 룰렛을 돌립니다.<br>
+· '⭐ 후보 담기' 탭에서 식당을 탭해 담고, '이 후보들 중에서 뽑기'로 담은 곳끼리만 룰렛을 돌립니다.<br>
 · '오늘 뺄 조건'에서 종류·지역·상황·가격을 제외하면 룰렛·목록에서 빠집니다.<br>
 · 거리 배지 탭 → 5→10→15→장거리 순환. 가격은 점심 기준 추정치이니 ✎로 조정하세요.<br>
 · 방문 기록·수정 내역은 기기(브라우저)마다 따로 저장됩니다.
@@ -355,7 +377,7 @@ const CATS = ["한식","분식","일식","중식","멕시칸","아시안","샐�
 const TAGS = ["혼밥","면","국밥·탕","해장","다이어트","시원","회식"];
 const DISTS = [{v:0,t:"전체"},{v:5,t:"5분 내"},{v:10,t:"10분 내"},{v:15,t:"15분 내"},{v:20,t:"장거리만"}];
 const PRICES = [{v:0,t:"전체"},{v:1,t:"만원 이하"},{v:2,t:"1만원대"},{v:3,t:"2만원 이상"}];
-const PLABEL = {1:"~1만",2:"1만대",3:"2만+"};
+const PLABEL = {1:"~1만원",2:"1만원대",3:"2만원+"};
 const ZLABEL = {5:"5분",10:"10분",15:"15분",20:"15분+"};
 const LS = {v:"yr2_visits", e:"yr2_edits", d:"yr2_deleted", a:"yr2_added"};
 const load = (k, def) => { try{ return JSON.parse(localStorage.getItem(k)) ?? def; }catch(e){ return def; } };
@@ -367,6 +389,8 @@ let reg = "전체", cat = "전체", dist = 0, price = 0, selTags = [];
 let exReg = [], exCat = [], exTags = [], exPrice = [];
 let picked = new Set();
 let lastSpin = "pool";
+let listMode = "manage";
+let searchQ = "";
 let editing = null, openGrps = {}, pendingDel = null, pendingReset = false, pendingImport = false;
 
 const $ = id => document.getElementById(id);
@@ -470,33 +494,55 @@ function renderBasket(){
 }
 
 function itemHTML(d){
+  if(listMode === "pick"){
+    const isPick = picked.has(d.n);
+    const meta = [d.c, d.m, d.l, d.r, PLABEL[d.p]].filter(Boolean).join(" · ");
+    return `<div class="item pickrow ${isPick ? 'picked' : ''}" onclick="togglePick('${esc(d.n)}')">
+      <div class="chk">${isPick ? '✓' : ''}</div>
+      <div class="info">
+        <div class="nm">${d.n}${d.t.map(t => `<span class="tg">${t}</span>`).join("")}</div>
+        <div class="mt">${meta || "&nbsp;"}</div>
+      </div>
+    </div>`;
+  }
   const excl = $("excl7").checked;
   const ago = daysAgo(d.n), r = recent(d.n);
   const visitTxt = ago === null ? "다녀옴" : (ago === 0 ? "오늘 ✓" : ago + "일 전 ✓");
-  const isPick = picked.has(d.n);
   const delBtn = pendingDel === d.n
     ? `<button class="del-confirm" onclick="delPlace('${esc(d.n)}')">삭제!</button>`
     : `<button class="icon-btn del" onclick="askDel('${esc(d.n)}')" title="삭제">✕</button>`;
   const meta = [d.m, d.l, d.r, PLABEL[d.p]].filter(Boolean).join(" · ");
-  return `<div class="item ${excl && r ? 'dim' : ''} ${isPick ? 'picked' : ''}">
+  return `<div class="item ${excl && r ? 'dim' : ''}">
     <div class="info">
       <div class="nm"><span class="nmlink" onclick="openMap('${esc(d.n)}')" title="네이버지도에서 보기">${d.n} <span class="mappin">📍</span></span>${d.t.map(t => `<span class="tg">${t}</span>`).join("")}</div>
       <div class="mt">${meta || "&nbsp;"}</div>
     </div>
     <button class="badge z${d.z}" onclick="cycleZone('${esc(d.n)}')" title="거리 변경">${ZLABEL[d.z]}</button>
     <button class="visit-btn ${r ? 'done' : ''}" onclick="toggleVisit('${esc(d.n)}')">${visitTxt}</button>
-    <button class="icon-btn pick ${isPick ? 'on' : ''}" onclick="togglePick('${esc(d.n)}')" title="후보 담기">${isPick ? '★' : '☆'}</button>
     <button class="icon-btn" onclick="startEdit('${esc(d.n)}')" title="수정">✎</button>
     ${delBtn}
   </div>`;
 }
 
+window.setMode = m => {
+  listMode = m;
+  $("modeManage").classList.toggle("on", m === "manage");
+  $("modePick").classList.toggle("on", m === "pick");
+  renderList();
+};
+
 function renderList(){
-  const data = all().filter(matches);
-  $("listTitle").textContent = `목록 (${data.length}곳)`;
+  let data = all().filter(matches);
+  const pick = listMode === "pick";
+  $("listHint").style.display = pick ? "block" : "none";
+  $("searchWrap").style.display = pick ? "block" : "none";
+  if(pick && searchQ){
+    const q = searchQ.toLowerCase();
+    data = data.filter(d => (d.n + " " + (d.m || "")).toLowerCase().includes(q));
+  }
   const groups = CATS.filter(c => data.some(d => d.c === c));
   const filtered = reg !== "전체" || cat !== "전체" || selTags.length > 0 || price !== 0 ||
-    exReg.length || exCat.length || exTags.length || exPrice.length;
+    exReg.length || exCat.length || exTags.length || exPrice.length || (pick && !!searchQ);
   $("list").innerHTML = groups.map(g => {
     const items = data.filter(d => d.c === g).sort((a,b) => a.z - b.z || a.n.localeCompare(b.n));
     const open = openGrps[g] || filtered;
@@ -751,6 +797,17 @@ $("importBtn").onclick = () => {
 };
 
 $("excl7").onchange = refresh;
+
+$("searchBox").addEventListener("input", e => {
+  searchQ = e.target.value.trim();
+  $("searchClear").style.display = searchQ ? "block" : "none";
+  renderList();
+});
+$("searchClear").onclick = () => {
+  searchQ = ""; $("searchBox").value = ""; $("searchClear").style.display = "none";
+  renderList(); $("searchBox").focus();
+};
+
 refresh();
 </script>
 </body>
