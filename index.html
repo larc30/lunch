@@ -32,6 +32,7 @@ h1 span{color:var(--accent);}
   border-radius:999px; padding:6px 12px; font-size:13px; cursor:pointer; font-family:inherit;}
 .chip.on{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600;}
 .chip.tag.on{background:var(--warn); border-color:var(--warn);}
+.chip.ex.on{background:var(--danger); border-color:var(--danger); color:#fff; font-weight:600; text-decoration:line-through;}
 .row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:14px 0;}
 .toggle{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--sub); cursor:pointer; user-select:none;}
 .toggle input{accent-color:var(--accent); width:16px; height:16px;}
@@ -42,6 +43,14 @@ h1 span{color:var(--accent);}
 .spin-btn:active{transform:scale(0.98);}
 .n-picks{border:1px solid var(--line); background:var(--card); color:var(--ink);
   border-radius:14px; font-size:15px; font-weight:600; font-family:inherit; padding:0 10px;}
+.basket{display:none; background:var(--warn-soft); border:1px solid var(--warn); border-radius:14px; padding:12px; margin-top:10px;}
+.basket-head{display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; color:var(--warn); margin-bottom:8px;}
+.basket-head button{border:none; background:none; color:var(--warn); font-size:12px; text-decoration:underline; cursor:pointer; font-family:inherit; padding:0;}
+.basket-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;}
+.bchip{display:inline-flex; align-items:center; gap:3px; background:var(--card); border:1px solid var(--warn); color:var(--ink); border-radius:999px; padding:4px 6px 4px 11px; font-size:12.5px; font-weight:600;}
+.bchip button{border:none; background:none; color:var(--sub); font-size:15px; cursor:pointer; padding:0 2px; font-family:inherit; line-height:1;}
+.basket-spin{width:100%; border:none; border-radius:11px; background:var(--warn); color:#fff; font-size:15px; font-weight:700; font-family:inherit; padding:12px; cursor:pointer;}
+.basket-spin:active{transform:scale(0.98);}
 .result{background:var(--card); border:1px solid var(--line); border-radius:16px;
   padding:20px 16px; text-align:center; margin:14px 0 8px; min-height:150px;
   display:flex; flex-direction:column; justify-content:center; gap:5px;}
@@ -81,6 +90,17 @@ h1 span{color:var(--accent);}
 .form .btns{display:flex; gap:8px; margin-top:10px;}
 .form .btns button{flex:1; border-radius:10px; padding:10px; font-size:14px; font-family:inherit; cursor:pointer; border:1px solid var(--line); background:transparent; color:var(--ink);}
 .form .btns .save{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700;}
+details.exwrap{margin-top:14px; background:var(--card); border:1px solid var(--line); border-radius:12px;}
+details.exwrap>summary{list-style:none; cursor:pointer; padding:11px 14px; font-size:13px; font-weight:700; color:var(--sub); user-select:none; display:flex; align-items:center; gap:6px;}
+details.exwrap>summary::-webkit-details-marker{display:none;}
+details.exwrap>summary::after{content:"›"; margin-left:auto; color:var(--sub);}
+details.exwrap[open]>summary{border-bottom:1px solid var(--line);}
+details.exwrap[open]>summary::after{content:"⌄";}
+details.exwrap #exCount{font-weight:700; color:var(--danger);}
+.exbody{padding:8px 14px 14px;}
+.exbody .lbl{margin-top:10px;}
+.exbody .lbl:first-child{margin-top:2px;}
+.ex-clear{margin-top:13px; width:100%; border:1px solid var(--line); background:transparent; color:var(--sub); border-radius:10px; padding:9px; font-size:13px; font-family:inherit; cursor:pointer;}
 details.grp{background:var(--card); border:1px solid var(--line); border-radius:12px; margin-bottom:7px; overflow:hidden;}
 details.grp summary{list-style:none; cursor:pointer; padding:11px 14px; display:flex; justify-content:space-between; align-items:center; user-select:none;}
 details.grp summary::-webkit-details-marker{display:none;}
@@ -90,6 +110,7 @@ details.grp[open] summary{border-bottom:1px solid var(--line);}
 .item{padding:9px 14px; display:flex; align-items:center; gap:7px; border-bottom:1px solid var(--line);}
 .item:last-child{border-bottom:none;}
 .item.dim{opacity:0.45;}
+.item.picked{background:var(--warn-soft);}
 .item .info{flex:1; min-width:0;}
 .item .nmlink{cursor:pointer;}
 .item .nmlink:active{opacity:0.6;}
@@ -108,6 +129,8 @@ details.grp[open] summary{border-bottom:1px solid var(--line);}
 .visit-btn.done{background:var(--accent-soft); color:var(--accent-ink); border-color:transparent; font-weight:600;}
 .icon-btn{border:none; background:none; color:var(--sub); font-size:14px; cursor:pointer; padding:2px 3px; font-family:inherit;}
 .icon-btn.del{color:var(--danger);}
+.icon-btn.pick{font-size:16px; color:var(--sub); line-height:1;}
+.icon-btn.pick.on{color:var(--warn);}
 .del-confirm{border:none; background:var(--danger); color:#fff; font-size:11px; font-weight:700;
   border-radius:7px; padding:4px 8px; cursor:pointer; font-family:inherit; white-space:nowrap;}
 details.syncwrap{margin-top:26px;}
@@ -143,6 +166,21 @@ details.syncwrap summary::after{content:" ›";}
 <div class="lbl">가격대 (점심)</div>
 <div class="chips" id="priceChips"></div>
 
+<details class="exwrap" id="exwrap">
+  <summary>➖ 오늘 뺄 조건 <span id="exCount"></span></summary>
+  <div class="exbody">
+    <div class="lbl">종류 제외</div>
+    <div class="chips" id="exCatChips"></div>
+    <div class="lbl">지역 제외</div>
+    <div class="chips" id="exRegChips"></div>
+    <div class="lbl">상황·메뉴 제외</div>
+    <div class="chips" id="exTagChips"></div>
+    <div class="lbl">가격대 제외</div>
+    <div class="chips" id="exPriceChips"></div>
+    <button class="ex-clear" id="exClear">제외 조건 모두 해제</button>
+  </div>
+</details>
+
 <div class="row">
   <label class="toggle"><input type="checkbox" id="excl7" checked> 최근 7일 간 곳 제외</label>
   <span class="count" id="poolCount"></span>
@@ -154,6 +192,8 @@ details.syncwrap summary::after{content:" ›";}
     <option value="1">1곳</option><option value="2">2곳</option><option value="3">3곳</option><option value="4">4곳</option><option value="5">5곳</option>
   </select>
 </div>
+
+<div id="basket" class="basket"></div>
 
 <div class="result" id="result">
   <span class="label">조건 고르고 버튼을 누르세요</span>
@@ -211,6 +251,8 @@ details.syncwrap summary::after{content:" ›";}
 
 <p class="hint">
 · 상호를 탭하면 네이버지도가 열립니다. ✎ 수정 / ✕ 삭제(한 번 더 누르면 확정).<br>
+· ☆ 별을 눌러 후보로 담고, '이 후보들 중에서 뽑기'를 누르면 담은 곳끼리만 룰렛을 돌립니다.<br>
+· '오늘 뺄 조건'에서 종류·지역·상황·가격을 제외하면 룰렛·목록에서 빠집니다.<br>
 · 거리 배지 탭 → 5→10→15→장거리 순환. 가격은 점심 기준 추정치이니 ✎로 조정하세요.<br>
 · 방문 기록·수정 내역은 기기(브라우저)마다 따로 저장됩니다.
 </p>
@@ -322,6 +364,9 @@ let edits = load(LS.e, {});
 let deleted = load(LS.d, []);
 let added = load(LS.a, []);
 let reg = "전체", cat = "전체", dist = 0, price = 0, selTags = [];
+let exReg = [], exCat = [], exTags = [], exPrice = [];
+let picked = new Set();
+let lastSpin = "pool";
 let editing = null, openGrps = {}, pendingDel = null, pendingReset = false, pendingImport = false;
 
 const $ = id => document.getElementById(id);
@@ -341,7 +386,11 @@ function matches(d){
     (cat === "전체" || d.c === cat) &&
     (dist === 0 || (dist === 20 ? d.z >= 20 : d.z <= dist)) &&
     (price === 0 || d.p === price) &&
-    selTags.every(t => d.t.includes(t));
+    selTags.every(t => d.t.includes(t)) &&
+    !exReg.includes(d.r) &&
+    !exCat.includes(d.c) &&
+    !exPrice.includes(d.p) &&
+    !exTags.some(t => d.t.includes(t));
 }
 function pool(){
   return all().filter(d => matches(d) && (!$("excl7").checked || !recent(d.n)));
@@ -361,6 +410,21 @@ function renderChips(){
   $("priceChips").innerHTML = PRICES.map(p =>
     `<button class="chip ${p.v===price?'on':''}" onclick="setPrice(${p.v})">${p.t}</button>`).join("");
 }
+
+function renderExcludeChips(){
+  const cats = CATS.filter(c => all().some(d => d.c === c));
+  $("exCatChips").innerHTML = cats.map(c =>
+    `<button class="chip ex ${exCat.includes(c)?'on':''}" onclick="toggleEx('cat','${c}')">${c}</button>`).join("");
+  $("exRegChips").innerHTML = REG_LIST.filter(r => all().some(d => d.r === r)).map(r =>
+    `<button class="chip ex ${exReg.includes(r)?'on':''}" onclick="toggleEx('reg','${r}')">${r}</button>`).join("");
+  $("exTagChips").innerHTML = TAGS.map(t =>
+    `<button class="chip ex ${exTags.includes(t)?'on':''}" onclick="toggleEx('tag','${t}')">${t}</button>`).join("");
+  $("exPriceChips").innerHTML = PRICES.filter(p => p.v !== 0).map(p =>
+    `<button class="chip ex ${exPrice.includes(p.v)?'on':''}" onclick="toggleEx('price',${p.v})">${p.t}</button>`).join("");
+  const cnt = exCat.length + exReg.length + exTags.length + exPrice.length;
+  $("exCount").textContent = cnt ? `· ${cnt}개 제외중` : "";
+}
+
 window.setReg = r => { reg = r; refresh(); };
 window.setCat = c => { cat = c; refresh(); };
 window.setDist = v => { dist = v; refresh(); };
@@ -369,6 +433,13 @@ window.toggleTag = t => {
   selTags = selTags.includes(t) ? selTags.filter(x => x !== t) : [...selTags, t];
   refresh();
 };
+window.toggleEx = (type, val) => {
+  const arr = {cat:exCat, reg:exReg, tag:exTags, price:exPrice}[type];
+  const i = arr.indexOf(val);
+  if(i >= 0) arr.splice(i, 1); else arr.push(val);
+  refresh();
+};
+$("exClear").onclick = () => { exReg = []; exCat = []; exTags = []; exPrice = []; refresh(); };
 
 function esc(s){ return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
 function mapLink(name){
@@ -376,21 +447,45 @@ function mapLink(name){
 }
 window.openMap = n => { window.open(mapLink(n), "_blank"); };
 
+window.togglePick = n => {
+  if(picked.has(n)) picked.delete(n); else picked.add(n);
+  renderList(); renderBasket();
+};
+window.clearPicks = () => { picked.clear(); renderList(); renderBasket(); };
+
+function renderBasket(){
+  const names = [...picked].filter(n => all().some(d => d.n === n));
+  picked = new Set(names);
+  const bar = $("basket");
+  if(!names.length){ bar.style.display = "none"; bar.innerHTML = ""; return; }
+  bar.style.display = "block";
+  bar.innerHTML =
+    `<div class="basket-head">
+       <span>⭐ 담은 후보 ${names.length}곳</span>
+       <button onclick="clearPicks()">비우기</button>
+     </div>
+     <div class="basket-chips">${names.map(n =>
+       `<span class="bchip">${n}<button onclick="togglePick('${esc(n)}')" title="빼기">×</button></span>`).join("")}</div>
+     <button class="basket-spin" onclick="spinBasket()">🎯 이 후보들 중에서 뽑기</button>`;
+}
+
 function itemHTML(d){
   const excl = $("excl7").checked;
   const ago = daysAgo(d.n), r = recent(d.n);
   const visitTxt = ago === null ? "다녀옴" : (ago === 0 ? "오늘 ✓" : ago + "일 전 ✓");
+  const isPick = picked.has(d.n);
   const delBtn = pendingDel === d.n
     ? `<button class="del-confirm" onclick="delPlace('${esc(d.n)}')">삭제!</button>`
     : `<button class="icon-btn del" onclick="askDel('${esc(d.n)}')" title="삭제">✕</button>`;
   const meta = [d.m, d.l, d.r, PLABEL[d.p]].filter(Boolean).join(" · ");
-  return `<div class="item ${excl && r ? 'dim' : ''}">
+  return `<div class="item ${excl && r ? 'dim' : ''} ${isPick ? 'picked' : ''}">
     <div class="info">
       <div class="nm"><span class="nmlink" onclick="openMap('${esc(d.n)}')" title="네이버지도에서 보기">${d.n} <span class="mappin">📍</span></span>${d.t.map(t => `<span class="tg">${t}</span>`).join("")}</div>
       <div class="mt">${meta || "&nbsp;"}</div>
     </div>
     <button class="badge z${d.z}" onclick="cycleZone('${esc(d.n)}')" title="거리 변경">${ZLABEL[d.z]}</button>
     <button class="visit-btn ${r ? 'done' : ''}" onclick="toggleVisit('${esc(d.n)}')">${visitTxt}</button>
+    <button class="icon-btn pick ${isPick ? 'on' : ''}" onclick="togglePick('${esc(d.n)}')" title="후보 담기">${isPick ? '★' : '☆'}</button>
     <button class="icon-btn" onclick="startEdit('${esc(d.n)}')" title="수정">✎</button>
     ${delBtn}
   </div>`;
@@ -400,7 +495,8 @@ function renderList(){
   const data = all().filter(matches);
   $("listTitle").textContent = `목록 (${data.length}곳)`;
   const groups = CATS.filter(c => data.some(d => d.c === c));
-  const filtered = reg !== "전체" || cat !== "전체" || selTags.length > 0 || price !== 0;
+  const filtered = reg !== "전체" || cat !== "전체" || selTags.length > 0 || price !== 0 ||
+    exReg.length || exCat.length || exTags.length || exPrice.length;
   $("list").innerHTML = groups.map(g => {
     const items = data.filter(d => d.c === g).sort((a,b) => a.z - b.z || a.n.localeCompare(b.n));
     const open = openGrps[g] || filtered;
@@ -416,8 +512,10 @@ function renderList(){
 
 function refresh(){
   renderChips();
+  renderExcludeChips();
   $("poolCount").textContent = `후보 ${pool().length}곳 / 전체 ${all().length}곳`;
   renderList();
+  renderBasket();
 }
 
 window.cycleZone = n => {
@@ -442,6 +540,7 @@ window.askDel = n => {
 
 window.delPlace = n => {
   pendingDel = null;
+  picked.delete(n);
   const ai = added.findIndex(x => x.n === n);
   if(ai >= 0){ added.splice(ai, 1); save(LS.a, added); }
   else { deleted.push(n); save(LS.d, deleted); }
@@ -503,6 +602,7 @@ $("saveBtn").onclick = () => {
       delete edits[editing]; save(LS.e, edits);
       added.push(rec); save(LS.a, added); }
     if(visits[editing] && n !== editing){ visits[n] = visits[editing]; delete visits[editing]; save(LS.v, visits); }
+    if(picked.has(editing) && n !== editing){ picked.delete(editing); picked.add(n); }
   } else {
     if(all().some(x => x.n === n)){ alert("같은 이름이 이미 있어요"); return; }
     added.push(rec); save(LS.a, added);
@@ -542,13 +642,44 @@ function pickN(arr, k){
   return out;
 }
 
+function renderResult(picks){
+  const res = $("result");
+  if(picks.length === 1){
+    const pk = picks[0];
+    res.innerHTML = `
+      <span class="label">오늘의 밥집 · ${pk.r} · 도보 ${ZLABEL[pk.z]}</span>
+      <span class="name">${pk.n}</span>
+      <span class="meta">${[pk.c, pk.m, pk.l, PLABEL[pk.p]].filter(Boolean).join(" · ")}</span>
+      <div class="actions">
+        <button class="primary" onclick="toggleVisit('${esc(pk.n)}')">오늘 다녀옴 체크</button>
+        <a href="${mapLink(pk.n)}" target="_blank">지도 보기</a>
+        <button onclick="reSpin()">다시 뽑기</button>
+      </div>`;
+  } else {
+    res.innerHTML = `<span class="label">오늘의 후보 ${picks.length}곳 — 골라 가세요</span>` +
+      picks.map((pk, idx) => `
+        <div class="pick-card">
+          <div class="num">${idx + 1}</div>
+          <div class="pi">
+            <div class="pn">${pk.n}</div>
+            <div class="pm">${[pk.c, pk.m, pk.r, '도보 ' + ZLABEL[pk.z], PLABEL[pk.p]].filter(Boolean).join(" · ")}</div>
+          </div>
+          <div class="pa">
+            <button onclick="toggleVisit('${esc(pk.n)}')">다녀옴</button>
+            <a href="${mapLink(pk.n)}" target="_blank">지도</a>
+          </div>
+        </div>`).join("") +
+      `<div class="actions"><button onclick="reSpin()">다시 뽑기</button></div>`;
+  }
+}
+
 let spinning = false;
-$("spinBtn").onclick = () => {
+function doSpin(sourceArr, emptyMsg){
   if(spinning) return;
-  const p = pool();
+  const p = sourceArr;
   const res = $("result");
   if(!p.length){
-    res.innerHTML = '<span class="label">조건에 맞는 후보가 없어요 — 필터를 넓혀보세요</span>';
+    res.innerHTML = `<span class="label">${emptyMsg}</span>`;
     return;
   }
   const k = Math.min(+$("nPicks").value, p.length);
@@ -560,39 +691,20 @@ $("spinBtn").onclick = () => {
     res.innerHTML = `<span class="label">뽑는 중…</span><span class="name">${d.n}</span>`;
     i++;
     if(i < ticks){ setTimeout(tick, 45 + Math.pow(i / ticks, 2) * 200); }
-    else {
-      const picks = pickN(p, k);
-      if(picks.length === 1){
-        const pk = picks[0];
-        res.innerHTML = `
-          <span class="label">오늘의 밥집 · ${pk.r} · 도보 ${ZLABEL[pk.z]}</span>
-          <span class="name">${pk.n}</span>
-          <span class="meta">${[pk.c, pk.m, pk.l, PLABEL[pk.p]].filter(Boolean).join(" · ")}</span>
-          <div class="actions">
-            <button class="primary" onclick="toggleVisit('${esc(pk.n)}')">오늘 다녀옴 체크</button>
-            <a href="${mapLink(pk.n)}" target="_blank">지도 보기</a>
-            <button onclick="document.getElementById('spinBtn').click()">다시 뽑기</button>
-          </div>`;
-      } else {
-        res.innerHTML = `<span class="label">오늘의 후보 ${picks.length}곳 — 골라 가세요</span>` +
-          picks.map((pk, idx) => `
-            <div class="pick-card">
-              <div class="num">${idx + 1}</div>
-              <div class="pi">
-                <div class="pn">${pk.n}</div>
-                <div class="pm">${[pk.c, pk.m, pk.r, '도보 ' + ZLABEL[pk.z], PLABEL[pk.p]].filter(Boolean).join(" · ")}</div>
-              </div>
-              <div class="pa">
-                <button onclick="toggleVisit('${esc(pk.n)}')">다녀옴</button>
-                <a href="${mapLink(pk.n)}" target="_blank">지도</a>
-              </div>
-            </div>`).join("") +
-          `<div class="actions"><button onclick="document.getElementById('spinBtn').click()">다시 뽑기</button></div>`;
-      }
-      spinning = false;
-    }
+    else { renderResult(pickN(p, k)); spinning = false; }
   })();
+}
+
+$("spinBtn").onclick = () => {
+  lastSpin = "pool";
+  doSpin(pool(), "조건에 맞는 후보가 없어요 — 필터를 넓혀보세요");
 };
+window.spinBasket = () => {
+  lastSpin = "basket";
+  const src = [...picked].map(n => all().find(d => d.n === n)).filter(Boolean);
+  doSpin(src, "담은 후보가 없어요 — ☆ 별로 먼저 담아주세요");
+};
+window.reSpin = () => { lastSpin === "basket" ? spinBasket() : $("spinBtn").click(); };
 
 $("exportBtn").onclick = async () => {
   const payload = JSON.stringify({yr:2, t:Date.now(), v:visits, e:edits, d:deleted, a:added});
